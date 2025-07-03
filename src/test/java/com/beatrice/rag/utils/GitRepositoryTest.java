@@ -5,14 +5,22 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class GitRepositoryTest {
     private final String testRepo = "https://github.com/octocat/Hello-World.git";
@@ -100,5 +108,38 @@ public class GitRepositoryTest {
         expected.put("name", "Hello-World");
         assertEquals(expected, info);
     }
+
+    @Tag("integration")
+    @Test
+    public void testIsRepoExistsTrue() {
+        boolean result = repo.isRepoExists();
+        assertTrue(result);
+    }
+
+    @Tag("integration")
+    @Test
+    public void isRepoExists_shouldReturnFalse_whenRepoDoesNotExist() {
+        GitRepository repo = new GitRepository("https://github.com/thisRepo/doesNotExist");
+        boolean result = repo.isRepoExists();
+        assertFalse(result);
+    }
+
+    @Test
+    public void isRepoExists_shouldThrowIllegalStateException_whenResponseIsUnexpected() throws IOException, InterruptedException, NoSuchFieldException, IllegalAccessException {
+        HttpClient mockClient = mock(HttpClient.class);
+        HttpResponse<String> mockResponse = mock(HttpResponse.class);
+
+        when(mockResponse.statusCode()).thenReturn(500);
+        when(mockClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                .thenReturn(mockResponse);
+
+        Field clientField = GitRepository.class.getDeclaredField("client");
+        clientField.setAccessible(true);
+
+        clientField.set(repo, mockClient);
+
+        assertThrows(IllegalStateException.class, repo::isRepoExists);
+    }
+
 
 }
