@@ -128,6 +128,47 @@ public class GitRepository {
     }
 
 
+    /**
+     * Checks if a GitHub repository exists by sending a HEAD request to the GitHub API.
+     * <p>
+     * Returns {@code true} if the repository exists (HTTP 200),
+     * {@code false} if it does not exist (HTTP 404).
+     * <p>
+     * Throws {@code IllegalStateException} for any unexpected HTTP response status.
+     *
+     * @return {@code true} if the repository exists; {@code false} if it does not exist
+     * @throws RuntimeException if the request to GitHub API fails
+     * @throws IllegalStateException if the response status is neither 200 nor 404
+     */
+
+    public boolean isRepoExists() {
+        int code;
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(this.apiUrl))
+                    .header("Authorization", "Bearer %s".formatted(GITHUB_PAT))
+                    .HEAD()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            code = response.statusCode();
+            if (code == HttpURLConnection.HTTP_NOT_FOUND) {
+                return false;
+            }
+
+            if (code == HttpURLConnection.HTTP_OK) {
+                return true;
+            }
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        throw new IllegalStateException("Unexpected response from Github: " + code);
+    }
+
+
+
     public String getRepoUrl() {
         return repoUrl;
     }
