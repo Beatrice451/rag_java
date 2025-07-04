@@ -22,6 +22,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.mockito/mockito-core
     testImplementation("org.mockito:mockito-core:5.18.0")
     mockitoAgent("org.mockito:mockito-core:5.18.0") { isTransitive = false }
+    implementation("org.jetbrains:annotations:24.0.0")
 }
 
 tasks.test {
