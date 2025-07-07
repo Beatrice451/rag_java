@@ -23,6 +23,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.18.0")
     mockitoAgent("org.mockito:mockito-core:5.18.0") { isTransitive = false }
     implementation("org.jetbrains:annotations:24.0.0")
+    implementation("com.openai:openai-java:2.12.0")
 }
 
 tasks.test {
