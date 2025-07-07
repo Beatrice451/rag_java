@@ -1,7 +1,8 @@
-package com.beatrice.rag.fileparser;
+package com.beatrice.rag.repositoryprocessor.fileparser;
 
 import java.io.IOException;
 import java.nio.file.Path;
-interface FileParser {
+
+public interface FileParser {
     FileData parse(Path file) throws IOException;
 }

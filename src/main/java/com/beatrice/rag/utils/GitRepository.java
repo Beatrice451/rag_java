@@ -56,17 +56,6 @@ public class GitRepository {
         return repoLocalPath;
     }
 
-    private String extractApiUrl() {
-        return this.repoUrl.replace("https://github.com/", "https://api.github.com/repos/");
-
-    }
-
-    private String extractRepoName() {
-        String[] splitUrl = this.repoUrl.split("/");
-        return splitUrl[splitUrl.length - 1];
-    }
-
-
     public boolean isCloned() {
         return Files.isDirectory(this.repoLocalPath);
     }
@@ -127,7 +116,6 @@ public class GitRepository {
                 ));
     }
 
-
     /**
      * Checks if a GitHub repository exists by sending a HEAD request to the GitHub API.
      * <p>
@@ -137,7 +125,7 @@ public class GitRepository {
      * Throws {@code IllegalStateException} for any unexpected HTTP response status.
      *
      * @return {@code true} if the repository exists; {@code false} if it does not exist
-     * @throws RuntimeException if the request to GitHub API fails
+     * @throws RuntimeException      if the request to GitHub API fails
      * @throws IllegalStateException if the response status is neither 200 nor 404
      */
 
@@ -167,8 +155,6 @@ public class GitRepository {
         throw new IllegalStateException("Unexpected response from Github: " + code);
     }
 
-
-
     public String getRepoUrl() {
         return repoUrl;
     }
@@ -190,6 +176,16 @@ public class GitRepository {
                 ", repoLocalDir='" + repoLocalDir + '\'' +
                 ", repoLocalPath='" + repoLocalPath + '\'' +
                 '}';
+    }
+
+    private String extractApiUrl() {
+        return this.repoUrl.replace("https://github.com/", "https://api.github.com/repos/");
+
+    }
+
+    private String extractRepoName() {
+        String[] splitUrl = this.repoUrl.split("/");
+        return splitUrl[splitUrl.length - 1];
     }
 
 }

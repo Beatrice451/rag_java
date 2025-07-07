@@ -1,14 +1,13 @@
-package com.beatrice.rag.textchunker;
+package com.beatrice.rag.repositoryprocessor.textchunker;
 
-import com.beatrice.rag.fileparser.FileData;
+import com.beatrice.rag.repositoryprocessor.fileparser.FileData;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class CharacterTextChunker implements TextChunker {
+public class CharacterTextChunker implements TextChunker {
     private static final int DEFAULT_CHUNK_SIZE = 1000;
     private static final int DEFAULT_CHUNK_OVERLAP = 100;
     private static final String[] DEFAULT_SEPARATORS = {"\n\n", "\n", " "};

@@ -1,4 +1,4 @@
-package com.beatrice.rag.fileparser;
+package com.beatrice.rag.repositoryprocessor.fileparser;
 
 import java.io.BufferedReader;
 import java.io.IOException;

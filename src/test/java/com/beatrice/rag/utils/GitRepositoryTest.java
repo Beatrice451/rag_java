@@ -24,11 +24,9 @@ import static org.mockito.Mockito.when;
 
 public class GitRepositoryTest {
     private final String testRepo = "https://github.com/octocat/Hello-World.git";
-    private GitRepository repo;
-
     @TempDir
     Path tempDir;
-
+    private GitRepository repo;
 
     @BeforeEach
     public void setUp() {

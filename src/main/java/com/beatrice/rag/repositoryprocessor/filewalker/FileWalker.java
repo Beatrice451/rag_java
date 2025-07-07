@@ -1,4 +1,4 @@
-package com.beatrice.rag.filewalker;
+package com.beatrice.rag.repositoryprocessor.filewalker;
 
 import java.nio.file.Path;
 import java.util.stream.Stream;

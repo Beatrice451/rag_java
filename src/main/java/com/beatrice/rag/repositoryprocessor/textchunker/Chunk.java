@@ -1,4 +1,4 @@
-package com.beatrice.rag.textchunker;
+package com.beatrice.rag.repositoryprocessor.textchunker;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -46,6 +46,12 @@ public class Chunk {
         return metadata;
     }
 
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
+
+
+    }
+
     @Override
     public String toString() {
         return "Chunk{" +
@@ -55,12 +61,6 @@ public class Chunk {
                 ", lineEnd=" + lineEnd +
                 ", metadata=" + metadata +
                 '}';
-    }
-
-    public void setMetadata(Map<String, String> metadata) {
-        this.metadata = metadata;
-
-
     }
 }
 

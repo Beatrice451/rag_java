@@ -1,4 +1,4 @@
-package com.beatrice.rag.filewalker;
+package com.beatrice.rag.repositoryprocessor.filewalker;
 
 import com.beatrice.rag.Config;
 import org.jetbrains.annotations.NotNull;
@@ -78,6 +78,7 @@ public class RecursiveFileWalker implements FileWalker {
      * The directory is ignored if it is in the set of directories to ignore
      * or if it starts with a dot.
      * </p>
+     *
      * @param dirPath the path of the directory
      * @return {@code true} if the directory should be ignored, {@code false} otherwise.
      */
@@ -92,6 +93,7 @@ public class RecursiveFileWalker implements FileWalker {
      * The file is ignored if it has an extension in the set of ignored
      * extensions or if it starts with a dot.
      * </p>
+     *
      * @param filePath the path of the file
      * @return {@code true} if a file should be ignored, {@code false} otherwise.
      */

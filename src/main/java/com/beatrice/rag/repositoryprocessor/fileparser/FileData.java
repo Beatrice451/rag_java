@@ -1,4 +1,4 @@
-package com.beatrice.rag.fileparser;
+package com.beatrice.rag.repositoryprocessor.fileparser;
 
 import java.util.Map;
 import java.util.Objects;
@@ -24,11 +24,8 @@ public class FileData {
     }
 
     @Override
-    public String toString() {
-        return "FileData{" +
-                "content='" + content + '\'' +
-                ", metadata=" + metadata +
-                '}';
+    public int hashCode() {
+        return Objects.hash(content, metadata);
     }
 
     @Override
@@ -39,7 +36,10 @@ public class FileData {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(content, metadata);
+    public String toString() {
+        return "FileData{" +
+                "content='" + content + '\'' +
+                ", metadata=" + metadata +
+                '}';
     }
 }

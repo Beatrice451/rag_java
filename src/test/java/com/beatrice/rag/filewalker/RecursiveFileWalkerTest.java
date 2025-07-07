@@ -1,5 +1,7 @@
 package com.beatrice.rag.filewalker;
 
+import com.beatrice.rag.repositoryprocessor.filewalker.FileWalker;
+import com.beatrice.rag.repositoryprocessor.filewalker.RecursiveFileWalker;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -15,17 +17,35 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RecursiveFileWalkerTest {
-    @TempDir
-    static Path tempDir;
     private static final Set<Path> ignoredDirs = Stream.of(
                     "ignored_dir"
             )
             .map(Path::of)
             .collect(Collectors.toSet());
-
     private static final Set<String> ignoredFileExts = Set.of(
             "exe"
     );
+    @TempDir
+    static Path tempDir;
+
+    @Tag("integration")
+    @Test
+    public void testWalk() {
+        FileWalker walker = new RecursiveFileWalker(ignoredFileExts, ignoredDirs);
+        Stream<Path> stream = walker.walk(tempDir);
+        Set<String> result = stream.map(Path::getFileName)
+                .map(Path::toString)
+                .collect(Collectors.toSet());
+        Set<String> expected = Set.of(
+                "included_file.txt",
+                "nameless_included_file",
+                "included_file.md"
+        );
+
+        assertEquals(result, expected);
+
+
+    }
 
     @BeforeAll
     static void setup() {
@@ -46,24 +66,5 @@ public class RecursiveFileWalkerTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Tag("integration")
-    @Test
-    public void testWalk() {
-        FileWalker walker = new RecursiveFileWalker(ignoredFileExts, ignoredDirs);
-        Stream<Path> stream = walker.walk(tempDir);
-        Set<String> result = stream.map(Path::getFileName)
-                .map(Path::toString)
-                .collect(Collectors.toSet());
-        Set<String> expected = Set.of(
-                        "included_file.txt",
-                        "nameless_included_file",
-                        "included_file.md"
-                );
-
-        assertEquals(result, expected);
-
-
     }
 }
