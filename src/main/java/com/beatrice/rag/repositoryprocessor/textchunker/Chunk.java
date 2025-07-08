@@ -1,5 +1,7 @@
 package com.beatrice.rag.repositoryprocessor.textchunker;
 
+import com.beatrice.rag.repositoryprocessor.chunkembedder.Embedding;
+
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -9,6 +11,15 @@ public class Chunk {
     private int lineStart;
     private int lineEnd;
     private Map<String, String> metadata;
+    private Embedding embedding;
+
+    public Embedding getEmbedding() {
+        return embedding;
+    }
+
+    public void setEmbedding(Embedding embedding) {
+        this.embedding = embedding;
+    }
 
     public String getText() {
         return text;
