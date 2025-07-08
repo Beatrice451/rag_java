@@ -12,6 +12,15 @@ public class Chunk {
     private int lineEnd;
     private Map<String, String> metadata;
     private Embedding embedding;
+    private String contentHash; // md5 hash of the chunk content
+
+    public String getContentHash() {
+        return contentHash;
+    }
+
+    public void setContentHash(String contentHash) {
+        this.contentHash = contentHash;
+    }
 
     public Embedding getEmbedding() {
         return embedding;
@@ -71,6 +80,8 @@ public class Chunk {
                 ", lineStart=" + lineStart +
                 ", lineEnd=" + lineEnd +
                 ", metadata=" + metadata +
+                ", embedding=" + embedding +
+                ", contentHash='" + contentHash + '\'' +
                 '}';
     }
 }

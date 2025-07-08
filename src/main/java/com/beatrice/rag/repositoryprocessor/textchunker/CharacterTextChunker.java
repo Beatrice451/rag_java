@@ -62,6 +62,7 @@ public class CharacterTextChunker implements TextChunker {
             chunk.setLineEnd(lineEnd);
             chunk.setSource(source);
             chunk.setMetadata(textMetadata);
+            chunk.setContentHash(hash(chunk));
 
             chunks.add(chunk);
 
