@@ -59,17 +59,7 @@ public class Config {
     );
     private static final Logger logger = Logger.getLogger(Config.class.getName());
     private static final Properties properties = new Properties();
-    //    DATABASE
-    public static final String DB_HOST = get("db.host", "localhost");
-    public static final String DB_NAME = get("db.name", "postgres");
-    public static final int DB_PORT = getInt("db.port", 5432);
-    public static final String DB_USER = get("db.user", "postgres");
-    public static final String DB_PASSWORD = get("db.password", "root");
-    //    GITHUB
-    public static final String GITHUB_PAT = getRequired("github.pat");
-    public static final String OPENAI_API_KEY = getRequired("openai.api.key");
-    public static final String OPENAI_BASE_URL = getRequired("openai.base.url");
-    public static final String EMBEDDING_MODEL_NAME = getRequired("embedding.model.name");
+
 
     static {
         try (InputStream input = Config.class.getClassLoader().getResourceAsStream("app.properties")) {
@@ -110,5 +100,18 @@ public class Config {
 
         return propValue;
     }
+    //    DATABASE
+    public static final String DB_HOST = get("db.host", "localhost");
+    public static final String DB_NAME = get("db.name", "postgres");
+    public static final int DB_PORT = getInt("db.port", 5432);
+    public static final String DB_USER = get("db.user", "postgres");
+    public static final String DB_PASSWORD = get("db.password", "root");
+    public static final String DB_DRIVER = get("db.driver", "postgresql");
+
+    //    GITHUB
+    public static final String GITHUB_PAT = getRequired("github.pat");
+    public static final String OPENAI_API_KEY = getRequired("openai.api.key");
+    public static final String OPENAI_BASE_URL = getRequired("openai.base.url");
+    public static final String EMBEDDING_MODEL_NAME = getRequired("embedding.model.name");
 
 }
