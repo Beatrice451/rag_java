@@ -45,6 +45,7 @@ public class APIChunkEmbedder implements ChunkEmbedder {
         return embeddings;
     }
 
+    @Override
     public void addEmbeddingToChunk(List<Chunk> chunks, List<Embedding> embeddings) {
         if (chunks.size() != embeddings.size()) {
             throw new IllegalArgumentException("Chunks and embeddings count mismatch");
