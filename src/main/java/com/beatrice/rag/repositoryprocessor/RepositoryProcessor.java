@@ -17,6 +17,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Orchestrates a full repository processing cycle.
+ * <p>
+ * This class coordinates the following modules:  <br>
+ * {@link FileWalker} for filtering repository files, <br>
+ * {@link FileParser} for parsing file content, <br>
+ * {@link TextChunker} for splitting file content into smaller pieces of code (chunks), <br>
+ * {@link ChunkEmbedder} for generating vector embeddings <br>
+ * </p>
+ *
+ * @see FileWalker
+ * @see FileParser
+ * @see TextChunker
+ * @see ChunkEmbedder
+ */
 public class RepositoryProcessor {
     private final FileWalker walker;
     private final FileParser parser;
@@ -32,6 +47,25 @@ public class RepositoryProcessor {
         this.dao = new ChunkDao(Database.getConnection());
     }
 
+
+    /**
+     * Processes the given Git repository and returns a list of text chunks with embeddings.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *   <li>Clones the repository (if not already cloned)</li>
+     *   <li>Walks through the files in the repository and filters them using {@code FileWalker}</li>
+     *   <li>Parses each file with {@code FileParser}</li>
+     *   <li>Splits the parsed content into chunks using {@code TextChunker}</li>
+     *   <li>Generates embeddings for the chunks via {@code ChunkEmbedder}</li>
+     *   <li>Associates the embeddings with the corresponding chunks</li>
+     *   <li>Persists each chunk in the database via {@code ChunkDao}</li>
+     * </ul>
+     *
+     * @param repository the Git repository to process
+     * @return a list of {@link Chunk} objects with associated embeddings and metadata
+     * @throws RuntimeException if file parsing fails
+     */
     public List<Chunk> processRepository(GitRepository repository) {
         repository.cloneRepo();
         List<Chunk> chunks = new ArrayList<>();

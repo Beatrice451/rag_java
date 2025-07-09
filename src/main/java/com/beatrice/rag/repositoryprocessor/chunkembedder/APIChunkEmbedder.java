@@ -12,6 +12,15 @@ import java.util.logging.Logger;
 
 import static com.beatrice.rag.Config.*;
 
+/**
+ * {@link ChunkEmbedder} that uses the OpenAI API to generate embeddings for given chunks.
+ * <p>
+ * This class is a concrete implementation of {@link ChunkEmbedder} that uses the OpenAI API to generate embeddings
+ * for given chunks.
+ * It reads the API key from the {@link com.beatrice.rag.Config}.
+ * <p>
+ * The base URL of the API is read from the {@link com.beatrice.rag.Config} class.
+ */
 public class APIChunkEmbedder implements ChunkEmbedder {
     private static final Logger logger = Logger.getLogger(APIChunkEmbedder.class.getName());
     private static final OpenAIClient client;
@@ -23,6 +32,7 @@ public class APIChunkEmbedder implements ChunkEmbedder {
                 .baseUrl(OPENAI_BASE_URL)
                 .build();
     }
+
 
     @Override
     public List<Embedding> embedChunks(List<Chunk> chunks) {
@@ -45,6 +55,11 @@ public class APIChunkEmbedder implements ChunkEmbedder {
         return embeddings;
     }
 
+
+    /**
+     * @param chunks     Chunks to add embedding vectors to
+     * @param embeddings Embedding to add to chunks
+     */
     @Override
     public void addEmbeddingToChunk(List<Chunk> chunks, List<Embedding> embeddings) {
         if (chunks.size() != embeddings.size()) {

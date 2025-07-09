@@ -18,6 +18,7 @@ public class Database {
     private static Connection connection;
 
     public static Connection getConnection() {
+        // jdbc:driver://host:port/db_name
         String conUrl = "jdbc:%s://%s:%d/%s".formatted(DB_DRIVER, DB_HOST, DB_PORT, DB_NAME);
         logger.info("Trying to connect to " + conUrl);
         try {
