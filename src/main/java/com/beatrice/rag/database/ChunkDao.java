@@ -28,8 +28,12 @@ public class ChunkDao {
             pstmt.setObject(3, chunk.getEmbedding().getValues());
             pstmt.setString(4, chunk.getText());
             pstmt.setObject(5, mapToJsonString(chunk.getMetadata()), Types.OTHER);
+            if (pstmt.executeUpdate() == 1) {
+                logger.fine("Chunk %s saved to database".formatted(chunk.getContentHash()));
+            } else {
+                logger.fine("Chunk %s already in database. Ignoring".formatted(chunk.getContentHash()));
+            }
 
-            pstmt.execute();
         } catch (SQLException e) {
             logger.warning("Exception occurred while saving chunk to db: " + e);
         }
