@@ -84,6 +84,7 @@ public class RepositoryProcessor {
         });
 
         List<Embedding> embeddings = embedder.embedChunks(chunks);
+        embeddings = embeddings.stream().map(Embedding::normalize).toList();
         embedder.addEmbeddingToChunk(chunks, embeddings);
         chunks.forEach(dao::saveChunk);
         return chunks;

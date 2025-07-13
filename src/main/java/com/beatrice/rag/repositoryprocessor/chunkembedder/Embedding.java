@@ -22,6 +22,25 @@ public class Embedding {
         return values.clone();
     }
 
+    public Embedding normalize() {
+        float sum = 0.0f;
+        float[] result = new float[this.values.length];
+        for (float i : this.values) {
+            sum += i * i;
+        }
+        float vectorLength = (float) Math.sqrt(sum);
+
+        if (vectorLength == 0.0) {
+            return new Embedding(this.values.clone());
+        }
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = this.values[i] / vectorLength;
+        }
+
+        return new Embedding(result);
+    }
+
     @Override
     public int hashCode() {
         return Arrays.hashCode(values);
