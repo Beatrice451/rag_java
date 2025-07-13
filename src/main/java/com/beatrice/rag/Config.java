@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Properties;
 import java.util.Set;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,7 +68,9 @@ public class Config {
                 throw new RuntimeException("Config file not found");
             }
             properties.load(input);
+            LogManager.getLogManager().readConfiguration(Config.class.getClassLoader().getResourceAsStream("logging.properties"));
             logger.info("Config loaded");
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to load configuration", e);
         }
