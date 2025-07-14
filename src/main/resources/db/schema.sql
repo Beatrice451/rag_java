@@ -14,5 +14,5 @@ ALTER TABLE public.embeddings
     OWNER TO postgres;
 
 CREATE INDEX IF NOT EXISTS idx_embeddings_embedding
-    ON public.embeddings USING ivfflat (embedding);
+    ON public.embeddings USING ivfflat (embedding vector_cosine_ops);
 
