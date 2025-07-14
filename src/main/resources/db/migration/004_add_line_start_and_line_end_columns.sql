@@ -1,0 +1,5 @@
+ALTER TABLE embeddings
+    ADD line_start INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE embeddings
+    ADD line_end INTEGER NOT NULL DEFAULT 0;
