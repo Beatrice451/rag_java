@@ -25,7 +25,6 @@ public class APIChunkEmbedder implements ChunkEmbedder {
     private static final Logger logger = Logger.getLogger(APIChunkEmbedder.class.getName());
     private static final OpenAIClient client;
 
-
     static {
         client = OpenAIOkHttpClient.builder()
                 .apiKey(OPENAI_API_KEY)
@@ -35,45 +34,32 @@ public class APIChunkEmbedder implements ChunkEmbedder {
 
 
     @Override
-    public List<Embedding> embedChunks(List<Chunk> chunks) {
-        List<Embedding> embeddings = new ArrayList<>();
-        List<String> texts = chunks.stream()
-                .map(Chunk::getText)
-                .toList();
-
-        for (String text : texts) {
-            logger.fine("Embedding text: %d/%d".formatted(embeddings.size() + 1, texts.size()));
-            EmbeddingCreateParams params = EmbeddingCreateParams.builder()
-                    .model(EMBEDDING_MODEL_NAME)
-                    .input(text)
-                    .build();
-            CreateEmbeddingResponse embedding = client.embeddings().create(params);
-            embeddings.add(
-                    new Embedding(embedding.data().getFirst().embedding())
-            );
-        }
-        return embeddings;
-    }
-
-
-    /**
-     * @param chunks     Chunks to add embedding vectors to
-     * @param embeddings Embedding to add to chunks
-     */
-    @Override
-    public void addEmbeddingToChunk(List<Chunk> chunks, List<Embedding> embeddings) {
-        if (chunks.size() != embeddings.size()) {
-            throw new IllegalArgumentException("Chunks and embeddings count mismatch");
+    public List<Chunk> embedChunks(List<Chunk> chunks) {
+        List<Chunk> result = new ArrayList<>();
+        if (chunks.isEmpty()) {
+            logger.info("No chunks to embed — possibly all embeddings already exist in the database");
+            return result;
         }
 
+        EmbeddingCreateParams params = EmbeddingCreateParams.builder()
+                .inputOfArrayOfStrings(chunks.stream()
+                        .map(Chunk::getText)
+                        .toList())
+                .model(EMBEDDING_MODEL_NAME)
+                .build();
+
+        logger.info("Received request to embed %s chunks".formatted(chunks.size()));
+
+        CreateEmbeddingResponse response = client.embeddings().create(params);
         for (int i = 0; i < chunks.size(); i++) {
-            Chunk chunk = chunks.get(i);
-            Embedding embedding = embeddings.get(i);
-            if (chunk.getEmbedding() != null) {
-                throw new IllegalArgumentException("Chunk at index %d already has an embedding".formatted(i));
-            }
-            chunk.setEmbedding(embedding);
+            Embedding embedding = new Embedding(response.data().get(i).embedding());
+            Chunk newChunk = new Chunk(chunks.get(i));
+            newChunk.setEmbedding(embedding);
+            result.add(newChunk);
         }
+
+
+        return result;
     }
 
 }

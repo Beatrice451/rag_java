@@ -6,20 +6,14 @@ import java.util.List;
 
 public interface ChunkEmbedder {
 
-    /**
-     * Generate embeddings for each chunk in the list of chunks
-     *
-     * @param chunks Chunks to generate embeddings for
-     * @return List of embeddings for each chunk in the input list
-     */
-    List<Embedding> embedChunks(List<Chunk> chunks);
-
 
     /**
-     * Take a list of embeddings and add them to a list of chunks respective
+     * Embeds the content of the given chunks
      *
-     * @param chunks Chunks to add embedding vectors to
-     * @param embeddings Embedding to add to chunks
+     * @param chunks List of chunks to be embedded
+     * @return List of chunks with their embeddings
+     * @see Chunk
      */
-    void addEmbeddingToChunk(List<Chunk> chunks, List<Embedding> embeddings);
+    List<Chunk> embedChunks(List<Chunk> chunks);
+
 }
