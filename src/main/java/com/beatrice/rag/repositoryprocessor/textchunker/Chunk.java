@@ -14,6 +14,20 @@ public class Chunk {
     private Embedding embedding;
     private String contentHash; // md5 hash of the chunk content
 
+
+    public Chunk() {}
+
+
+    public Chunk(Chunk other) {
+        this.text = other.text;
+        this.source = other.source;
+        this.lineStart = other.lineStart;
+        this.lineEnd = other.lineEnd;
+        this.metadata = other.metadata == null ? Map.of() : Map.copyOf(other.metadata);
+        this.embedding = other.embedding == null ? null : new Embedding(other.embedding);
+        this.contentHash = other.contentHash;
+    }
+
     public String getContentHash() {
         return contentHash;
     }
