@@ -9,14 +9,12 @@ import org.postgresql.util.PGobject;
 
 import java.nio.file.Path;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class ChunkDao {
-    private final Connection connection;
     private static final Logger logger = Logger.getLogger(ChunkDao.class.getName());
+    private final Connection connection;
 
     public ChunkDao(Connection connection) {
         this.connection = connection;
@@ -67,6 +65,7 @@ public class ChunkDao {
                 PGobject pgMetadata = (PGobject) res.getObject("metadata");
                 Map<String, String> metadata = jsonStringToMap(pgMetadata.getValue());
                 Chunk chunk = new Chunk();
+
                 chunk.setContentHash(contentHash);
                 chunk.setSource(source);
                 chunk.setMetadata(metadata);
@@ -82,6 +81,32 @@ public class ChunkDao {
         return chunks;
     }
 
+    /**
+     * Retrieve a list containing a given number of chunk hashes from a database
+     *
+     * @return List with hashes of chunks from a database of a given size
+     * @throws SQLException if a database access error occurs or a closed connection is used
+     */
+    public Set<String> getExistingChunkHashes(List<Chunk> chunks) {
+        String placeholders = String.join(", ", Collections.nCopies(chunks.size(), "?"));
+        String sql = "SELECT content_hash FROM embeddings WHERE content_hash IN (%s)".formatted(placeholders);
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            for (int i = 0; i < chunks.size(); i++) {
+                pstmt.setString(i + 1, chunks.get(i).getContentHash());
+            }
+            ResultSet rs = pstmt.executeQuery();
+            Set<String> existing = new HashSet<>();
+            while (rs.next()) {
+                existing.add(rs.getString(1));
+            }
+
+            return existing;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 
     private String mapToJsonString(Map<?, ?> map) {
         ObjectMapper mapper = new ObjectMapper();
@@ -95,7 +120,8 @@ public class ChunkDao {
     private Map<String, String> jsonStringToMap(String json) {
         ObjectMapper mapper = new ObjectMapper();
         try {
-            return mapper.readValue(json, new TypeReference<>(){});
+            return mapper.readValue(json, new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
