@@ -18,6 +18,10 @@ public class Embedding {
         this.values = res;
     }
 
+    public Embedding(Embedding other) {
+        this.values = other.values.clone();
+    }
+
     public float[] getValues() {
         return values.clone();
     }
