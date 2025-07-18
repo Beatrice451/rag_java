@@ -3,7 +3,6 @@ package com.beatrice.rag.repositoryprocessor;
 import com.beatrice.rag.database.ChunkDao;
 import com.beatrice.rag.database.Database;
 import com.beatrice.rag.repositoryprocessor.chunkembedder.ChunkEmbedder;
-import com.beatrice.rag.repositoryprocessor.chunkembedder.Embedding;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileData;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileParser;
 import com.beatrice.rag.repositoryprocessor.filewalker.FileWalker;
@@ -14,7 +13,9 @@ import com.beatrice.rag.utils.GitRepository;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -47,7 +48,6 @@ public class RepositoryProcessor {
         this.dao = new ChunkDao(Database.getConnection());
     }
 
-
     /**
      * Processes the given Git repository and returns a list of text chunks with embeddings.
      * <p>
@@ -73,21 +73,47 @@ public class RepositoryProcessor {
         Path repoRoot = repository.getRepoLocalPath();
         Stream<Path> filteredFiles = walker.walk(repoRoot);
         filteredFiles.forEach(file -> {
-            FileData parsed = null;
+            FileData parsed;
             try {
                 parsed = parser.parse(file);
             } catch (IOException e) {
                 throw new RuntimeException("Error occurred while parsing files: " + e);
             }
-            List<Chunk> fileChunks = chunker.chunk(parsed);
-            chunks.addAll(fileChunks);
+            chunks.addAll(chunker.chunk(parsed));
         });
 
-        List<Embedding> embeddings = embedder.embedChunks(chunks);
-        embeddings = embeddings.stream().map(Embedding::normalize).toList();
-        embedder.addEmbeddingToChunk(chunks, embeddings);
-        chunks.forEach(dao::saveChunk);
-        return chunks;
+        Set<String> existingHashes = getExistingChunkHashes(chunks, 500);
+        List<Chunk> chunksToEmbed = chunks.stream()
+                .filter(chunk -> !existingHashes.contains(chunk.getContentHash()))
+                .toList();
+
+        List<Chunk> embeddedChunks = embedder.embedChunks(chunksToEmbed);
+        embeddedChunks.forEach(chunk ->
+                chunk.setEmbedding(chunk.getEmbedding().normalize())
+        );
+        embeddedChunks.forEach(dao::saveChunk);
+        return embeddedChunks;
+    }
+
+    /**
+     * Filter chunks that already have embeddings in the database.
+     *
+     * @param chunks    the list of chunks to filter
+     * @param batchSize the number of chunks to query the database for at once
+     * @return a list of chunks that have embeddings in the database
+     */
+    private Set<String> getExistingChunkHashes(List<Chunk> chunks, int batchSize) {
+        Set<String> existingHashes = new HashSet<>();
+        int listSize = chunks.size();
+
+        for (int start = 0; start < listSize; start += batchSize) {
+            int end = Math.min(start + batchSize, listSize);
+            List<Chunk> sublist = chunks.subList(start, end);
+            existingHashes.addAll(this.dao.getExistingChunkHashes(sublist));
+        }
+
+        return existingHashes;
     }
 
 }
+
