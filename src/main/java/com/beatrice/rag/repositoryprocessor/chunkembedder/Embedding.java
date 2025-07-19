@@ -3,13 +3,26 @@ package com.beatrice.rag.repositoryprocessor.chunkembedder;
 import java.util.Arrays;
 import java.util.List;
 
+
+/**
+ * Represents a vector embedding.
+ * <p>Instances of this class are immutable: all internal values are deeply copied when accessed or constructed.</p>
+ */
 public class Embedding {
     private final float[] values;
+
 
     public Embedding(float[] values) {
         this.values = values.clone();
     }
 
+
+    /**
+     * Constructs an {@code Embedding} from a list of {@link Number} values.
+     * Each number is converted to float.
+     *
+     * @param values list of numbers to be converted into an embedding
+     */
     public Embedding(List<? extends Number> values) {
         float[] res = new float[values.size()];
         for (int i = 0; i < values.size(); i++) {
@@ -26,6 +39,15 @@ public class Embedding {
         return values.clone();
     }
 
+
+    /**
+     * Returns a new {@link Embedding} instance with the vector normalized to unit length.
+     * <p>
+     *     Normalization is done by dividing each element of the vector by its L2 norm.
+     *     If the vector length is zero, a copy of the original vector is returned.
+     * </p>
+     * @return normalized embedding vector as an {@code Embedding}
+     */
     public Embedding normalize() {
         float sum = 0.0f;
         float[] result = new float[this.values.length];
