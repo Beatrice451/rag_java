@@ -12,6 +12,22 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+
+/**
+ * Data Access Object (DAO) for managing {@link Chunk} data and embeddings in the database.
+ * <p>
+ * Provides methods for persisting chunks, retrieving relevant chunks based on embedding cosine similarity, etc.
+ * </p>
+ *
+ * <p>
+ * This class abstracts all low-level database interactions, allowing other modules to remain storage-agnostic.
+ * </p>
+ *
+ * <p>
+ * <b>Note: </b> This implementation assumes PostgreSQL as the underlying database system and uses
+ * <a href="https://github.com/pgvector/pgvector">pgvector</a> extension for storaging and querying vector embeddings.
+ * </p>
+ */
 public class ChunkDao {
     private static final Logger logger = Logger.getLogger(ChunkDao.class.getName());
     private final Connection connection;
@@ -20,6 +36,11 @@ public class ChunkDao {
         this.connection = connection;
     }
 
+    /**
+     * Persists the taken chunk to a database
+     *
+     * @param chunk Chunk to persist
+     */
     public void saveChunk(Chunk chunk) {
         try (PreparedStatement pstmt = connection.prepareStatement(
                 "INSERT INTO embeddings (content_hash, file_path, embedding, content, metadata, line_start, line_end) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING"
@@ -44,6 +65,14 @@ public class ChunkDao {
 
     }
 
+    /**
+     * Retrieves the most relevant chunks based on cosine similarity to the given question embedding,
+     * using the <a href="https://github.com/pgvector/pgvector">pgvector</a> extension's {@code <=>} operator
+     *
+     * @param embeddedQuestion Embedding of the question for which cosine similarity is calculated
+     * @param limit            How many relevant chunks to return
+     * @return List of chunks ranked by relevance to the question embedding
+     */
     public List<Chunk> retrieveRelevantChunks(Embedding embeddedQuestion, int limit) {
         List<Chunk> chunks = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(
@@ -81,11 +110,12 @@ public class ChunkDao {
         return chunks;
     }
 
+
     /**
-     * Retrieve a list containing a given number of chunk hashes from a database
+     * Returns a set of hashes of chunks that already exist in the database.
      *
-     * @return List with hashes of chunks from a database of a given size
-     * @throws SQLException if a database access error occurs or a closed connection is used
+     * @param chunks The list of chunks to check for existence in the database.
+     * @return A set of hashes of the chunks that already exist in the database.
      */
     public Set<String> getExistingChunkHashes(List<Chunk> chunks) {
         String placeholders = String.join(", ", Collections.nCopies(chunks.size(), "?"));
@@ -108,6 +138,12 @@ public class ChunkDao {
     }
 
 
+    /**
+     * Converts the given Map to JSON string
+     *
+     * @param map Map to be converted
+     * @return JSON string representation of the given map
+     */
     private String mapToJsonString(Map<?, ?> map) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -117,6 +153,12 @@ public class ChunkDao {
         }
     }
 
+    /**
+     * Converts the given JSON string to a map
+     *
+     * @param json JSON string to be converted
+     * @return converted map
+     */
     private Map<String, String> jsonStringToMap(String json) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -127,6 +169,16 @@ public class ChunkDao {
         }
     }
 
+    /**
+     * Converts the given {@link PGobject} to a float array
+     * <p>
+     * It is used to handle the {@code vector} data type
+     * provided by the <a href="https://github.com/pgvector/pgvector">pgvector</a> extension
+     * </p>
+     *
+     * @param pGobject {@link PGobject} to extract a float array from
+     * @return float array extracted from the object
+     */
     private float[] pgObjectToFloatArray(PGobject pGobject) {
         String value = pGobject.getValue();
         if (value == null || value.isBlank()) {
