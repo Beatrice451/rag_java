@@ -7,7 +7,7 @@ public class Embedding {
     private final float[] values;
 
     public Embedding(float[] values) {
-        this.values = values;
+        this.values = values.clone();
     }
 
     public Embedding(List<? extends Number> values) {
