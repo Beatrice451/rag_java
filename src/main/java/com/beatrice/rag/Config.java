@@ -1,5 +1,8 @@
 package com.beatrice.rag;
 
+import com.beatrice.rag.repositoryprocessor.fileparser.TikaFileParser;
+import com.beatrice.rag.repositoryprocessor.filewalker.RecursiveFileWalker;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -11,6 +14,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Config {
+
+    /**
+     * Set of dirs that will be ignored by {@link RecursiveFileWalker}
+     */
     public static final Set<Path> DIRS_TO_IGNORE = Stream.of(
                     ".git",
                     ".svn",
@@ -23,6 +30,8 @@ public class Config {
                     ".mypy_cache",
                     "node_modules",
                     "venv",
+                    "gradle",
+                    "resources",
                     ".venv",
                     "env",
                     "dist",
@@ -34,6 +43,11 @@ public class Config {
                     "tmp"
             ).map(Path::of)
             .collect(Collectors.toSet());
+
+
+    /**
+     * Set of file extensions that will be ignored by {@link RecursiveFileWalker}
+     */
     public static final Set<String> FILE_EXTENSIONS_TO_IGNORE = Set.of(
             "exe",
             "dll",
@@ -58,6 +72,20 @@ public class Config {
             "bak",
             "swp"
     );
+
+
+    /**
+     * Set of allowed file MIME-types for the {@link TikaFileParser}.
+     * Files with any other MIME type will be ignored.
+     */
+    public static final Set<String> ALLOWED_MIME_TYPES = Set.of(
+            "text/plain",
+            "text/html",
+            "text/xml",
+            "application/xml",
+            "application/json"
+            );
+
     private static final Logger logger = Logger.getLogger(Config.class.getName());
     private static final Properties properties = new Properties();
 
@@ -116,5 +144,6 @@ public class Config {
     public static final String OPENAI_API_KEY = getRequired("openai.api.key");
     public static final String OPENAI_BASE_URL = getRequired("openai.base.url");
     public static final String EMBEDDING_MODEL_NAME = getRequired("embedding.model.name");
+    public static final String GENERATIVE_MODEL_NAME = getRequired("generative.model.name");
 
 }
