@@ -2,6 +2,7 @@ package com.beatrice.rag.repositoryprocessor;
 
 import com.beatrice.rag.database.ChunkDao;
 import com.beatrice.rag.database.Database;
+import com.beatrice.rag.exception.ParserException;
 import com.beatrice.rag.repositoryprocessor.chunkembedder.Embedder;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileData;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileParser;
@@ -11,11 +12,10 @@ import com.beatrice.rag.repositoryprocessor.textchunker.TextChunker;
 import com.beatrice.rag.utils.GitRepository;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 /**
@@ -34,6 +34,8 @@ import java.util.stream.Stream;
  * @see Embedder
  */
 public class RepositoryProcessor {
+    private static final Logger logger = Logger.getLogger(RepositoryProcessor.class.getName());
+
     private final FileWalker walker;
     private final FileParser parser;
     private final TextChunker chunker;
@@ -75,15 +77,10 @@ public class RepositoryProcessor {
 
         Path repoRoot = repository.getRepoLocalPath();
         Stream<Path> filteredFiles = walker.walk(repoRoot);
-        filteredFiles.forEach(file -> {
-            FileData parsed;
-            try {
-                parsed = parser.parse(file);
-            } catch (IOException e) {
-                throw new RuntimeException("Error occurred while parsing file %s: %s".formatted(file, e));
-            }
-            chunks.addAll(chunker.chunk(parsed));
-        });
+        filteredFiles.map(this::safeParse)
+                .flatMap(Optional::stream)
+                .flatMap(parsed -> chunker.chunk(parsed).stream())
+                .forEach(chunks::add);
         chunks.forEach(chunk -> chunk.setSourceRepo(repository.getFullName()));
 
         Set<String> existingHashes = getExistingChunkHashes(chunks, 500);
@@ -117,6 +114,17 @@ public class RepositoryProcessor {
         }
 
         return existingHashes;
+    }
+
+    private Optional<FileData> safeParse(Path file) {
+        try {
+            return Optional.of(parser.parse(file));
+        } catch (IOException e) {
+            throw new UncheckedIOException("I/O error while parsing " + file, e);
+        } catch (ParserException e) {
+            logger.warning("Parser exception occurred while parsing %s: %s".formatted(file, e));
+            return Optional.empty();
+        }
     }
 
 }
