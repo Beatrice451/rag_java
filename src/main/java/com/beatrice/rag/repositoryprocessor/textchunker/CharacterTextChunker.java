@@ -51,6 +51,9 @@ public class CharacterTextChunker implements TextChunker {
             }
 
             String chunkContent = content.substring(start, end);
+            if (chunkContent.isBlank()) {
+                continue;
+            }
             Chunk chunk = new Chunk();
             chunk.setText(chunkContent);
 
