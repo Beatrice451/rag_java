@@ -1,5 +1,7 @@
 package com.beatrice.rag.repositoryprocessor.fileparser;
 
+import com.beatrice.rag.exception.ParserException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,7 +10,7 @@ import java.util.Map;
 
 public class FileParserImpl extends AbstractFileParser {
     @Override
-    public FileData parse(Path file) throws IOException {
+    public FileData parse(Path file) throws IOException, ParserException {
         FileData output = new FileData();
         String content = readFile(file);
         Map<String, String> metadata = extractMetadata(file, content);
@@ -17,7 +19,7 @@ public class FileParserImpl extends AbstractFileParser {
         return output;
     }
 
-    private static String readFile(Path file) throws IOException {
+    private static String readFile(Path file) throws IOException, ParserException {
         if (Files.isReadable(file)) {
             String line;
             StringBuilder content = new StringBuilder();
@@ -28,7 +30,7 @@ public class FileParserImpl extends AbstractFileParser {
             }
             return content.toString();
         }
-        throw new IOException("File is not readable");
+        throw new ParserException("File is not readable");
     }
 
 }
