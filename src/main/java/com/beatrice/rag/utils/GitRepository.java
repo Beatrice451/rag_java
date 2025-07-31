@@ -31,6 +31,7 @@ public class GitRepository {
     private final String repoName;
     private final Path repoLocalDir;
     private final Path repoLocalPath;
+    private final String fullName;
 
 
     public GitRepository(String repoUrl, Path repoLocalDir) {
@@ -42,10 +43,20 @@ public class GitRepository {
         this.repoName = extractRepoName();
         this.repoLocalDir = repoLocalDir;
         this.repoLocalPath = this.repoLocalDir.resolve(repoName);
+        this.fullName = extractFullName();
     }
 
     public GitRepository(String repoUrl) {
         this(repoUrl, Path.of("cloned_repos"));
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    private String extractFullName() {
+        Object name = this.getInfo("full_name").get("full_name");
+        return (String) name;
     }
 
     public Path getRepoLocalDir() {

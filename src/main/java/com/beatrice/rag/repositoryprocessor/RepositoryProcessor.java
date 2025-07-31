@@ -2,7 +2,7 @@ package com.beatrice.rag.repositoryprocessor;
 
 import com.beatrice.rag.database.ChunkDao;
 import com.beatrice.rag.database.Database;
-import com.beatrice.rag.repositoryprocessor.chunkembedder.ChunkEmbedder;
+import com.beatrice.rag.repositoryprocessor.chunkembedder.Embedder;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileData;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileParser;
 import com.beatrice.rag.repositoryprocessor.filewalker.FileWalker;
@@ -25,22 +25,25 @@ import java.util.stream.Stream;
  * {@link FileWalker} for filtering repository files, <br>
  * {@link FileParser} for parsing file content, <br>
  * {@link TextChunker} for splitting file content into smaller pieces of code (chunks), <br>
- * {@link ChunkEmbedder} for generating vector embeddings <br>
+ * {@link Embedder} for generating vector embeddings <br>
  * </p>
  *
  * @see FileWalker
  * @see FileParser
  * @see TextChunker
- * @see ChunkEmbedder
+ * @see Embedder
  */
 public class RepositoryProcessor {
     private final FileWalker walker;
     private final FileParser parser;
     private final TextChunker chunker;
-    private final ChunkEmbedder embedder;
+    private final Embedder<List<Chunk>, List<Chunk>> embedder;
     private final ChunkDao dao;
 
-    public RepositoryProcessor(FileWalker walker, FileParser parser, TextChunker chunker, ChunkEmbedder embedder) {
+    public RepositoryProcessor(FileWalker walker,
+                               FileParser parser,
+                               TextChunker chunker,
+                               Embedder<List<Chunk>, List<Chunk>> embedder) {
         this.walker = walker;
         this.parser = parser;
         this.chunker = chunker;
@@ -77,17 +80,18 @@ public class RepositoryProcessor {
             try {
                 parsed = parser.parse(file);
             } catch (IOException e) {
-                throw new RuntimeException("Error occurred while parsing files: " + e);
+                throw new RuntimeException("Error occurred while parsing file %s: %s".formatted(file, e));
             }
             chunks.addAll(chunker.chunk(parsed));
         });
+        chunks.forEach(chunk -> chunk.setSourceRepo(repository.getFullName()));
 
         Set<String> existingHashes = getExistingChunkHashes(chunks, 500);
         List<Chunk> chunksToEmbed = chunks.stream()
                 .filter(chunk -> !existingHashes.contains(chunk.getContentHash()))
                 .toList();
 
-        List<Chunk> embeddedChunks = embedder.embedChunks(chunksToEmbed);
+        List<Chunk> embeddedChunks = embedder.embed(chunksToEmbed);
         embeddedChunks.forEach(chunk ->
                 chunk.setEmbedding(chunk.getEmbedding().normalize())
         );
@@ -100,7 +104,7 @@ public class RepositoryProcessor {
      *
      * @param chunks    the list of chunks to filter
      * @param batchSize the number of chunks to query the database for at once
-     * @return a list of chunks that have embeddings in the database
+     * @return set of chunks that have embeddings in the database
      */
     private Set<String> getExistingChunkHashes(List<Chunk> chunks, int batchSize) {
         Set<String> existingHashes = new HashSet<>();

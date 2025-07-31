@@ -43,7 +43,11 @@ public class ChunkDao {
      */
     public void saveChunk(Chunk chunk) {
         try (PreparedStatement pstmt = connection.prepareStatement(
-                "INSERT INTO embeddings (content_hash, file_path, embedding, content, metadata, line_start, line_end) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING"
+                """
+                        INSERT INTO embeddings
+                            (content_hash, file_path, embedding, content, metadata, line_start, line_end, source_repo_name)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING
+                       """
         )) {
             pstmt.setString(1, chunk.getContentHash());
             pstmt.setString(2, String.valueOf(chunk.getSource()));
@@ -52,6 +56,7 @@ public class ChunkDao {
             pstmt.setObject(5, mapToJsonString(chunk.getMetadata()), Types.OTHER);
             pstmt.setInt(6, chunk.getLineStart());
             pstmt.setInt(7, chunk.getLineEnd());
+            pstmt.setString(8, chunk.getSourceRepo());
             if (pstmt.executeUpdate() == 1) {
                 logger.fine("Chunk %s saved to database".formatted(chunk.getContentHash()));
             } else {
@@ -73,14 +78,14 @@ public class ChunkDao {
      * @param limit            How many relevant chunks to return
      * @return List of chunks ranked by relevance to the question embedding
      */
-    public List<Chunk> retrieveRelevantChunks(Embedding embeddedQuestion, int limit) {
+    public List<Chunk> retrieveRelevantChunks(Embedding embeddedQuestion, int limit, String fullRepoName) {
         List<Chunk> chunks = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(
-                "SELECT * FROM embeddings ORDER BY embedding <=> ?::vector LIMIT ?"
+                "SELECT * FROM embeddings WHERE source_repo_name = ? ORDER BY embedding <=> ?::vector LIMIT ?"
         )) {
-            pstmt.setObject(1, embeddedQuestion.getValues());
-            pstmt.setInt(2, limit);
-            System.out.println(pstmt);
+            pstmt.setString(1, fullRepoName);
+            pstmt.setObject(2, embeddedQuestion.getValues());
+            pstmt.setInt(3, limit);
 
             var res = pstmt.executeQuery();
             while (res.next()) {

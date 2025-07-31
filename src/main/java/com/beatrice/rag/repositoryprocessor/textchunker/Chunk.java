@@ -8,12 +8,20 @@ import java.util.Map;
 public class Chunk {
     private String text;
     private Path source;
+    private String sourceRepo;
     private int lineStart;
     private int lineEnd;
     private Map<String, String> metadata;
     private Embedding embedding;
     private String contentHash; // md5 hash of the chunk content
 
+    public String getSourceRepo() {
+        return sourceRepo;
+    }
+
+    public void setSourceRepo(String sourceRepo) {
+        this.sourceRepo = sourceRepo;
+    }
 
     public Chunk() {}
 
@@ -21,6 +29,7 @@ public class Chunk {
     public Chunk(Chunk other) {
         this.text = other.text;
         this.source = other.source;
+        this.sourceRepo = other.sourceRepo;
         this.lineStart = other.lineStart;
         this.lineEnd = other.lineEnd;
         this.metadata = other.metadata == null ? Map.of() : Map.copyOf(other.metadata);
