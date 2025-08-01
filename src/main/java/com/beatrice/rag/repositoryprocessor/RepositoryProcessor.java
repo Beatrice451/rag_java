@@ -45,12 +45,13 @@ public class RepositoryProcessor {
     public RepositoryProcessor(FileWalker walker,
                                FileParser parser,
                                TextChunker chunker,
-                               Embedder<List<Chunk>, List<Chunk>> embedder) {
+                               Embedder<List<Chunk>, List<Chunk>> embedder,
+                               ChunkDao dao) {
         this.walker = walker;
         this.parser = parser;
         this.chunker = chunker;
         this.embedder = embedder;
-        this.dao = new ChunkDao(Database.getConnection());
+        this.dao = dao;
     }
 
     /**
