@@ -52,6 +52,12 @@ public class CharacterTextChunker implements TextChunker {
 
             String chunkContent = content.substring(start, end);
             if (chunkContent.isBlank()) {
+                int newStart = end - this.chunkOverlap;
+                if (newStart <= start) {
+                    start = end;
+                } else {
+                    start = newStart;
+                }
                 continue;
             }
             Chunk chunk = new Chunk();
