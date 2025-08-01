@@ -21,6 +21,7 @@ public class APIChunkEmbedder extends AbstractEmbedder<List<Chunk>, List<Chunk>>
 
     @Override
     public List<Chunk> embed(List<Chunk> chunks) {
+        long start = System.nanoTime();
         List<Chunk> result = new ArrayList<>();
         if (chunks.isEmpty()) {
             logger.info("No chunks to embed — possibly all embeddings already exist in the database");
@@ -44,7 +45,7 @@ public class APIChunkEmbedder extends AbstractEmbedder<List<Chunk>, List<Chunk>>
             result.add(newChunk);
         }
 
-
+        logger.fine("Embedded %d chunks in %d ms".formatted(result.size(), (System.nanoTime() - start) / 1_000_000));
         return result;
     }
 

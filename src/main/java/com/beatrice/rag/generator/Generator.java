@@ -52,6 +52,7 @@ public class Generator {
     }
 
     public String generate(String question, List<Chunk> chunks) {
+        long start = System.nanoTime();
         logger.info("Sending question to the generator. Waiting for the answer");
         List<String> context = new ArrayList<>();
         for (Chunk chunk : chunks) {
@@ -70,6 +71,7 @@ public class Generator {
 
         ChatCompletion completion = client.chat().completions().create(params);
         Optional<String> content = completion.choices().getFirst().message().content();
+        logger.fine("Answer generated in %s ms".formatted((System.nanoTime() - start) / 1_000_000));
         return content.orElse("The answer is empty");
     }
 }

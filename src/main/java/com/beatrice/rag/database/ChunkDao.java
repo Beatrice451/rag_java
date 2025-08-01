@@ -58,9 +58,9 @@ public class ChunkDao {
             pstmt.setInt(7, chunk.getLineEnd());
             pstmt.setString(8, chunk.getSourceRepo());
             if (pstmt.executeUpdate() == 1) {
-                logger.fine("Chunk %s saved to database".formatted(chunk.getContentHash()));
+                logger.finer("Chunk %s saved to database".formatted(chunk.getContentHash()));
             } else {
-                logger.fine("Chunk %s already in database. Ignoring".formatted(chunk.getContentHash()));
+                logger.finer("Chunk %s already in database. Ignoring".formatted(chunk.getContentHash()));
             }
 
         } catch (SQLException e) {

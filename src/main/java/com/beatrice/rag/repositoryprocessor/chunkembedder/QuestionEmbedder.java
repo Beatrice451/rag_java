@@ -14,14 +14,16 @@ public class QuestionEmbedder extends AbstractEmbedder<String, Embedding> {
 
     @Override
     public Embedding embed(String input) {
+        long start = System.nanoTime();
         EmbeddingCreateParams params = EmbeddingCreateParams.builder()
                 .input(input)
                 .model(EMBEDDING_MODEL_NAME)
                 .build();
 
-        logger.fine("Received request to embed question");
+        logger.info("Received request to embed question");
 
         CreateEmbeddingResponse response = client.embeddings().create(params);
+        logger.fine("Embedded question in %d ms".formatted((System.nanoTime() - start) / 1_000_000));
         return new Embedding(response.data().getFirst().embedding());
 
     }
