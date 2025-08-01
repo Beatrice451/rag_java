@@ -87,27 +87,28 @@ public class ChunkDao {
             pstmt.setObject(2, embeddedQuestion.getValues());
             pstmt.setInt(3, limit);
 
-            var res = pstmt.executeQuery();
-            while (res.next()) {
-                String contentHash = res.getString("content_hash");
-                Path source = Path.of(res.getString("file_path"));
-                int lineStart = res.getInt("line_start");
-                int lineEnd = res.getInt("line_end");
-                PGobject pgEmbedding = (PGobject) res.getObject("embedding");
-                Embedding embedding = new Embedding(pgObjectToFloatArray(pgEmbedding));
-                String content = res.getString("content");
-                PGobject pgMetadata = (PGobject) res.getObject("metadata");
-                Map<String, String> metadata = jsonStringToMap(pgMetadata.getValue());
-                Chunk chunk = new Chunk();
+            try (ResultSet res = pstmt.executeQuery()) {
+                while (res.next()) {
+                    String contentHash = res.getString("content_hash");
+                    Path source = Path.of(res.getString("file_path"));
+                    int lineStart = res.getInt("line_start");
+                    int lineEnd = res.getInt("line_end");
+                    PGobject pgEmbedding = (PGobject) res.getObject("embedding");
+                    Embedding embedding = new Embedding(pgObjectToFloatArray(pgEmbedding));
+                    String content = res.getString("content");
+                    PGobject pgMetadata = (PGobject) res.getObject("metadata");
+                    Map<String, String> metadata = jsonStringToMap(pgMetadata.getValue());
+                    Chunk chunk = new Chunk();
 
-                chunk.setContentHash(contentHash);
-                chunk.setSource(source);
-                chunk.setMetadata(metadata);
-                chunk.setText(content);
-                chunk.setEmbedding(embedding);
-                chunk.setLineStart(lineStart);
-                chunk.setLineEnd(lineEnd);
-                chunks.add(chunk);
+                    chunk.setContentHash(contentHash);
+                    chunk.setSource(source);
+                    chunk.setMetadata(metadata);
+                    chunk.setText(content);
+                    chunk.setEmbedding(embedding);
+                    chunk.setLineStart(lineStart);
+                    chunk.setLineEnd(lineEnd);
+                    chunks.add(chunk);
+                }
             }
         } catch (SQLException e) {
             logger.warning("Exception occurred while selecting vectors from database: " + e);
@@ -129,10 +130,13 @@ public class ChunkDao {
             for (int i = 0; i < chunks.size(); i++) {
                 pstmt.setString(i + 1, chunks.get(i).getContentHash());
             }
-            ResultSet rs = pstmt.executeQuery();
-            Set<String> existing = new HashSet<>();
-            while (rs.next()) {
-                existing.add(rs.getString(1));
+            Set<String> existing = null;
+            try (ResultSet rs = pstmt.executeQuery()) {
+
+                existing = new HashSet<>();
+                while (rs.next()) {
+                    existing.add(rs.getString(1));
+                }
             }
 
             return existing;
