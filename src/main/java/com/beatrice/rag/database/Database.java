@@ -1,6 +1,8 @@
 package com.beatrice.rag.database;
 
 import com.beatrice.rag.Config;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,24 +26,30 @@ public class Database {
     private static final String DB_PASSWORD = Config.DB_PASSWORD;
     private static final String DB_DRIVER = Config.DB_DRIVER;
     private static final int DB_PORT = Config.DB_PORT;
+    private static final HikariDataSource dataSource = initDataSource();
 
-    /**
-     * Establishes and returns a connection to the configured PostgreSQL database.
-     *
-     * @return a {@link Connection} object to interact with the database
-     * @throws RuntimeException if a {@link SQLException} occurs while attempting to connect
-     */
-    public static Connection getConnection() {
-        // jdbc:driver://host:port/db_name
+
+    private static HikariDataSource initDataSource() {
+        logger.info("Initializing data source");
+        HikariConfig config = new HikariConfig();
         String conUrl = "jdbc:%s://%s:%d/%s".formatted(DB_DRIVER, DB_HOST, DB_PORT, DB_NAME);
-        logger.info("Trying to connect to " + conUrl);
-        try {
-            Connection con = DriverManager.getConnection(conUrl, DB_USER, DB_PASSWORD);
-            logger.info("Successfully connected to " + conUrl);
-            return con;
-        } catch (SQLException e) {
-            throw new RuntimeException("Can't connect to db: " + e);
-        }
+        config.setJdbcUrl(conUrl);
+        config.setUsername(DB_USER);
+        config.setPassword(DB_PASSWORD);
+
+        config.setMaximumPoolSize(10);
+        config.setIdleTimeout(30000);
+        config.setConnectionTimeout(10000);
+        config.setLeakDetectionThreshold(60000);
+
+        logger.info("Data source initialized successfully: " + conUrl);
+        return new HikariDataSource(config);
+
+    }
+
+    public static Connection getConnection() throws SQLException {
+        logger.info("Connection acquired for HikariCP pool");
+        return dataSource.getConnection();
     }
 
 }
