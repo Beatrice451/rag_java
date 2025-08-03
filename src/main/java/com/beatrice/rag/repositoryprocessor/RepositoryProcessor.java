@@ -73,7 +73,11 @@ public class RepositoryProcessor {
      * @throws RuntimeException if file parsing fails
      */
     public List<Chunk> processRepository(GitRepository repository) {
-        repository.cloneRepo();
+        return this.processRepository(repository, "main");
+    }
+
+    public List<Chunk> processRepository(GitRepository repository, String repoBranch) {
+        repository.cloneRepo(repoBranch);
         List<Chunk> chunks = new ArrayList<>();
 
         Path repoRoot = repository.getRepoLocalPath();

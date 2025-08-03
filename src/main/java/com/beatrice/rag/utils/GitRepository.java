@@ -71,6 +71,18 @@ public class GitRepository {
         return Files.isDirectory(this.repoLocalPath);
     }
 
+    public boolean isCloned(String branch) {
+        if (this.isCloned()) {
+            try (Git git = Git.open(repoLocalPath.toFile())) {
+                String currentBranch = git.getRepository().getBranch();
+                return currentBranch.equals(branch);
+            } catch (IOException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+
     public void cloneRepo() {
         logger.info("Trying to clone repository: %s".formatted(this.repoName));
         if (this.isCloned()) {
@@ -79,6 +91,24 @@ public class GitRepository {
         }
         try (Git res = Git.cloneRepository()
                 .setURI(this.repoUrl)
+                .setDirectory(this.repoLocalPath.toFile())
+                .call()) {
+
+        } catch (GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void cloneRepo(String branchToClone) {
+        String branchRef = "refs/heads/" + branchToClone;
+        logger.info("Trying to clone repository: %s, branch: %s".formatted(this.repoName, branchToClone));
+        if (this.isCloned(branchToClone)) {
+            logger.info("Repository %s with branch %s already cloned. Using existing copy".formatted(this.repoName, branchRef));
+            return;
+        }
+        try (Git res = Git.cloneRepository()
+                .setURI(this.repoUrl)
+                .setBranch(branchRef)
                 .setDirectory(this.repoLocalPath.toFile())
                 .call()) {
 
