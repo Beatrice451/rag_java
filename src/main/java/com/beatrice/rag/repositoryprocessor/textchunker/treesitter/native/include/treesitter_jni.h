@@ -1,0 +1,8 @@
+#ifndef TREESITTER_JNI_H
+#define TREESITTER_JNI_H
+
+#include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree.h"
+#include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node.h"
+#include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_TreeSitterParser.h"
+
+#endif

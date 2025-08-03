@@ -67,7 +67,6 @@ public class RecursiveFileWalker implements FileWalker {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-
         return collectedPaths.stream();
     }
 
