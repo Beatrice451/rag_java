@@ -1,7 +1,7 @@
 package com.beatrice.rag.textchunker.treesitter;
 
-import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parsers.Language;
-import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parsers.TreeSitterParser;
+import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parser.Language;
+import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parser.TreeSitterParser;
 import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.wrappers.Node;
 import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.wrappers.Tree;
 import org.junit.jupiter.api.AfterEach;
