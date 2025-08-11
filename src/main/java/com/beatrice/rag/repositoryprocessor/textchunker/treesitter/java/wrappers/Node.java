@@ -21,6 +21,7 @@ public class Node {
         this.nodePtr = nodePtr;
         this.startByte = getStartByte(nodePtr);
         this.endByte = getEndByte(nodePtr);
+        // Using copyOfRange because bytes != characters
         this.content = new String(
                 Arrays.copyOfRange(sourceCode.getBytes(StandardCharsets.UTF_8), startByte, endByte),
                 StandardCharsets.UTF_8

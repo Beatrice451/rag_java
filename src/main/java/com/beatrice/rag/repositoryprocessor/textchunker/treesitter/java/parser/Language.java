@@ -1,4 +1,4 @@
-package com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parsers;
+package com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parser;
 
 public enum Language {
     JAVA("java"),

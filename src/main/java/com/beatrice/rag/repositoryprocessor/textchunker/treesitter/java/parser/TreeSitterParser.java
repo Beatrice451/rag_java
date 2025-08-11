@@ -1,4 +1,4 @@
-package com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parsers;
+package com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.parser;
 
 import com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.wrappers.Tree;
 
