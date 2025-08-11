@@ -22,23 +22,23 @@ public class Tree implements AutoCloseable {
         this.sourceCode = content;
     }
 
+    public String getSourceCode() {
+        return sourceCode;
+    }
+
     /**
      * @param treePtr pointer to the AST to delete
      */
     public native void deleteTree(long treePtr);
 
     public List<Node> getNodesOfType(String type) {
-        List<Node> nodes = new ArrayList<>();
-        long[] nodePtrs = getNodesOfType(treePtr, type);
-        for (long nodePtr : nodePtrs) {
-            Node node = createNode(nodePtr, sourceCode);
-            nodes.add(node);
-        }
-        return nodes;
+        long rootNodePtr = getRootNode(this.treePtr);
+        Node rootNode = createNode(rootNodePtr);
+        return rootNode.getNodesOfType(type);
     }
 
-    private Node createNode(long nodePtr, String sourceCode) {
-        Node node = new Node(nodePtr, sourceCode);
+    private Node createNode(long nodePtr) {
+        Node node = new Node(nodePtr, this);
         childNodes.add(node);
         return node;
     }
@@ -54,11 +54,6 @@ public class Tree implements AutoCloseable {
 
     }
 
-    /**
-     * @param treePtr  pointer to the AST
-     * @param nodeType name of the node type to extract
-     * @return array of pointers to nodes of the specified type
-     */
-    private native long[] getNodesOfType(long treePtr, String nodeType);
 
+    private native long getRootNode(long treePtr);
 }

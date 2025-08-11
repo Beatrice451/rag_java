@@ -39,6 +39,22 @@ JNIEXPORT jint JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_tre
 JNIEXPORT jlongArray JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getNodeCoordinates
   (JNIEnv *, jobject, jlong);
 
+/*
+ * Class:     com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node
+ * Method:    getChildByFieldName
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getChildByFieldName
+  (JNIEnv *, jobject, jlong, jstring);
+
+/*
+ * Class:     com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node
+ * Method:    getNodesByType
+ * Signature: (JLjava/lang/String;)[J
+ */
+JNIEXPORT jlongArray JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getNodesByType
+  (JNIEnv *, jobject, jlong, jstring);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,9 @@
 package com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.wrappers;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Node {
@@ -10,22 +12,36 @@ public class Node {
     }
 
     private final long nodePtr;
-    private final String content;
+    private final Tree tree;
     private final int startByte;
     private final int endByte;
 
-    public Node(long nodePtr, String sourceCode) {
+    public Node(long nodePtr, Tree tree) {
         if (nodePtr == 0) {
             throw new IllegalArgumentException("Node pointer cannot be 0");
         }
         this.nodePtr = nodePtr;
+        this.tree = tree;
         this.startByte = getStartByte(nodePtr);
         this.endByte = getEndByte(nodePtr);
-        // Using copyOfRange because bytes != characters
-        this.content = new String(
-                Arrays.copyOfRange(sourceCode.getBytes(StandardCharsets.UTF_8), startByte, endByte),
-                StandardCharsets.UTF_8
-        );
+    }
+
+    public String getContent() {
+        return tree.getSourceCode().substring(startByte, endByte);
+    }
+
+    public List<Node> getNodesOfType(String type) {
+        List<Node> result = new ArrayList<>();
+        long[] nodePtrs = getNodesOfType(this.nodePtr, type);
+        for (long ptr : nodePtrs) {
+            result.add(new Node(ptr, this.tree));
+        }
+        return result;
+    }
+
+    public Node getChildByFieldName(String fieldName) {
+        long childPtr = getChildByFieldName(this.nodePtr, fieldName);
+        return new Node(childPtr, this.tree);
     }
 
 
@@ -33,7 +49,7 @@ public class Node {
     /**
      * @param nodePtr pointer to the node to free
      */
-    private static native void freeNode(long nodePtr);
+    private native void freeNode(long nodePtr);
 
     public void freeNode() {
         freeNode(this.nodePtr);
@@ -45,10 +61,6 @@ public class Node {
 
     public long[] getNodeCoordinates() {
         return getNodeCoordinates(nodePtr);
-    }
-
-    public String getContent() {
-        return content;
     }
 
     public void close() {
@@ -84,4 +96,8 @@ public class Node {
      * @return array of the form [startRow, startColumn, endRow, endColumn]
      */
     private native long[] getNodeCoordinates(long nodePtr);
+
+    private native long getChildByFieldName(long nodePtr, String fieldName);
+
+    private native long[] getNodesOfType(long nodePtr, String type);
 }

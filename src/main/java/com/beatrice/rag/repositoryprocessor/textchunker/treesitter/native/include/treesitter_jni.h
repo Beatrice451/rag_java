@@ -3,6 +3,6 @@
 
 #include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree.h"
 #include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node.h"
-#include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_TreeSitterParser.h"
+#include "com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parser_TreeSitterParser.h"
 
 #endif

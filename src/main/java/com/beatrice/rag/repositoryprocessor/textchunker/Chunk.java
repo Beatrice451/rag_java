@@ -14,17 +14,10 @@ public class Chunk {
     private Map<String, String> metadata;
     private Embedding embedding;
     private String contentHash; // md5 hash of the chunk content
+    private String codeSource;
 
-    public String getSourceRepo() {
-        return sourceRepo;
+    public Chunk() {
     }
-
-    public void setSourceRepo(String sourceRepo) {
-        this.sourceRepo = sourceRepo;
-    }
-
-    public Chunk() {}
-
 
     public Chunk(Chunk other) {
         this.text = other.text;
@@ -35,6 +28,23 @@ public class Chunk {
         this.metadata = other.metadata == null ? Map.of() : Map.copyOf(other.metadata);
         this.embedding = other.embedding == null ? null : new Embedding(other.embedding);
         this.contentHash = other.contentHash;
+        this.codeSource = other.codeSource;
+    }
+
+    public String getSourceRepo() {
+        return sourceRepo;
+    }
+
+    public void setSourceRepo(String sourceRepo) {
+        this.sourceRepo = sourceRepo;
+    }
+
+    public String getCodeSource() {
+        return codeSource;
+    }
+
+    public void setCodeSource(String codeSource) {
+        this.codeSource = codeSource;
     }
 
     public String getContentHash() {
@@ -91,20 +101,20 @@ public class Chunk {
 
     public void setMetadata(Map<String, String> metadata) {
         this.metadata = metadata;
-
-
     }
 
     @Override
     public String toString() {
         return "Chunk{" +
-                "text='" + text + '\'' +
+//                "text='" + text + '\'' +
                 ", source=" + source +
+                ", sourceRepo='" + sourceRepo + '\'' +
                 ", lineStart=" + lineStart +
                 ", lineEnd=" + lineEnd +
                 ", metadata=" + metadata +
                 ", embedding=" + embedding +
                 ", contentHash='" + contentHash + '\'' +
+                ", codeSource='" + codeSource + '\'' +
                 '}';
     }
 }

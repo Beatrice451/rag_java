@@ -17,11 +17,11 @@ JNIEXPORT void JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_tre
 
 /*
  * Class:     com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree
- * Method:    getNodesOfType
- * Signature: (JLjava/lang/String;)[J
+ * Method:    getRootNode
+ * Signature: (J)J
  */
-JNIEXPORT jlongArray JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree_getNodesOfType
-  (JNIEnv *, jobject, jlong, jstring);
+JNIEXPORT jlong JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree_getRootNode
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }

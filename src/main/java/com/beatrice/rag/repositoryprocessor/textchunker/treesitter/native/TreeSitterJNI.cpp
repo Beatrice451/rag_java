@@ -20,7 +20,7 @@ const TSLanguage *get_language_by_name(const char *name) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_TreeSitterParser_createParser(
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parser_TreeSitterParser_createParser(
     JNIEnv *env, jclass /* obj */) {
     TSParser *parser = ts_parser_new();
     if (!parser)
@@ -31,7 +31,7 @@ Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_Tr
 
 
 JNIEXPORT void JNICALL
-    Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_TreeSitterParser_setParserLanguage
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parser_TreeSitterParser_setParserLanguage
 (JNIEnv *env, jobject obj, jlong parserPtr, jstring lang) {
     const char *langNameC = env->GetStringUTFChars(lang, nullptr);
 
@@ -51,7 +51,8 @@ JNIEXPORT void JNICALL
 }
 
 
-JNIEXPORT jlong JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_TreeSitterParser_parse(
+JNIEXPORT jlong JNICALL
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parser_TreeSitterParser_parse(
     JNIEnv *env, jobject obj, jlong parserPtr, jstring code) {
     auto *parser = reinterpret_cast<TSParser *>(parserPtr);
     const char *source = env->GetStringUTFChars(code, nullptr);
@@ -61,29 +62,29 @@ JNIEXPORT jlong JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_tr
 }
 
 JNIEXPORT jlongArray JNICALL
-Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree_getNodesOfType(
-    JNIEnv *env, jobject obj, const jlong treePtr, jstring typeStr) {
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getNodesOfType(
+    JNIEnv *env, jobject obj, const jlong nodePtr, jstring typeStr) {
     const char *targetType = env->GetStringUTFChars(typeStr, nullptr);
-    const auto *tree = reinterpret_cast<TSTree *>(treePtr);
-    const TSNode root = ts_tree_root_node(tree);
+    const TSNode *node = reinterpret_cast<TSNode *>(nodePtr);
+
 
     std::vector<TSNode> resultNodes;
-    std::function<void(TSNode)> visit = [&](TSNode node) {
-        if (strcmp(ts_node_type(node), targetType) == 0) {
-            resultNodes.push_back(node);
+    std::function<void(TSNode)> visit = [&](TSNode current) {
+        if (strcmp(ts_node_type(current), targetType) == 0) {
+            resultNodes.push_back(current);
         }
-        uint32_t count = ts_node_child_count(node);
+        uint32_t count = ts_node_child_count(current);
         for (uint32_t i = 0; i < count; ++i) {
-            visit(ts_node_child(node, i));
+            visit(ts_node_child(current, i));
         }
     };
 
-    visit(root);
+    visit(*node);
 
     jlongArray result = env->NewLongArray(resultNodes.size());
     std::vector<jlong> nodePtrs;
-    for (const TSNode node: resultNodes) {
-        auto *copy = new TSNode(node);
+    for (const TSNode n: resultNodes) {
+        auto *copy = new TSNode(n);
         nodePtrs.push_back(reinterpret_cast<jlong>(copy));
     }
 
@@ -93,7 +94,7 @@ Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_T
 }
 
 JNIEXPORT void JNICALL
-Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parsers_TreeSitterParser_deleteParser(
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_parser_TreeSitterParser_deleteParser(
     JNIEnv *env, jobject obj, jlong parserPtr) {
     auto *parser = reinterpret_cast<TSParser *>(parserPtr);
     ts_parser_delete(parser);
@@ -127,7 +128,7 @@ JNIEXPORT void JNICALL Java_com_beatrice_rag_repositoryprocessor_textchunker_tre
 }
 
 JNIEXPORT jlongArray JNICALL
-    Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getNodeCoordinates
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getNodeCoordinates
 (JNIEnv *env, jobject obj, jlong nodePtr) {
     auto *node = reinterpret_cast<TSNode *>(nodePtr);
     TSPoint start = ts_node_start_point(*node);
@@ -147,5 +148,38 @@ JNIEXPORT jlongArray JNICALL
 
     env->SetLongArrayRegion(result, 0, 4, coords);
     return result;
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Node_getChildByFieldName
+(JNIEnv *env, jobject obj, jlong nodePtr, jstring fieldName) {
+    const char *fieldNameCStr = env->GetStringUTFChars(fieldName, nullptr);
+
+
+    const TSNode *node = reinterpret_cast<TSNode *>(nodePtr);
+
+
+    TSNode child = ts_node_child_by_field_name(
+        *node,
+        fieldNameCStr,
+        static_cast<uint32_t>(strlen(fieldNameCStr))
+    );
+
+
+    env->ReleaseStringUTFChars(fieldName, fieldNameCStr);
+
+
+    auto *childCopy = new TSNode(child);
+
+    return reinterpret_cast<jlong>(childCopy);
+}
+
+JNIEXPORT jlong JNICALL
+Java_com_beatrice_rag_repositoryprocessor_textchunker_treesitter_java_wrappers_Tree_getRootNode(
+    JNIEnv *env, jobject obj, jlong treePtr) {
+    const auto *tree = reinterpret_cast<TSTree *>(treePtr);
+    const TSNode root = ts_tree_root_node(tree);
+    auto *copy = new TSNode(root);
+    return reinterpret_cast<jlong>(copy);
 }
 }
