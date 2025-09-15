@@ -36,8 +36,8 @@ public class CharacterTextChunker implements TextChunker {
 
     @Override
     public List<Chunk> chunk(FileData fileData) {
-        String content = fileData.getContent();
-        Map<String, String> textMetadata = fileData.getMetadata();
+        String content = fileData.content();
+        Map<String, String> textMetadata = fileData.metadata();
 
         List<Chunk> chunks = new ArrayList<>();
         int start = 0;

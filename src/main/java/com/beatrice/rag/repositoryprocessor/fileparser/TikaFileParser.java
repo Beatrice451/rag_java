@@ -25,15 +25,11 @@ public class TikaFileParser extends AbstractFileParser {
         if (!ALLOWED_MIME_TYPES.contains(fileMime)) {
             throw new ParserException("Unallowed MIME type: %s for file %s".formatted(fileMime, file));
         }
-        FileData output = new FileData();
         String content = readFile(file);
         Map<String, String> metadata = extractMetadata(file, content);
 
-        output.setMetadata(metadata);
-        output.setContent(content);
 
-
-        return output;
+        return new FileData(content, metadata);
     }
 
     private static String readFile(Path file) throws IOException, ParserException {

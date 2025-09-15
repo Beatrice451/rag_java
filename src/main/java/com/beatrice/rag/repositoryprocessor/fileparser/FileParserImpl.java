@@ -11,12 +11,9 @@ import java.util.Map;
 public class FileParserImpl extends AbstractFileParser {
     @Override
     public FileData parse(Path file) throws IOException, ParserException {
-        FileData output = new FileData();
         String content = readFile(file);
         Map<String, String> metadata = extractMetadata(file, content);
-        output.setContent(content);
-        output.setMetadata(metadata);
-        return output;
+        return new FileData(content, metadata);
     }
 
     private static String readFile(Path file) throws IOException, ParserException {

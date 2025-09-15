@@ -19,8 +19,8 @@ public class JavaTSChunker implements TextChunker, AutoCloseable {
 
     @Override
     public List<Chunk> chunk(FileData fileData) {
-        String content = fileData.getContent();
-        Map<String, String> metadata = fileData.getMetadata();
+        String content = fileData.content();
+        Map<String, String> metadata = fileData.metadata();
         List<Chunk> chunks = new ArrayList<>();
 
         Tree tree = parser.parse(content, Language.JAVA);
