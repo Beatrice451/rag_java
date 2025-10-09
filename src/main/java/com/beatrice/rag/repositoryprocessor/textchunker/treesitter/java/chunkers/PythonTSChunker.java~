@@ -1,0 +1,4 @@
+package com.beatrice.rag.repositoryprocessor.textchunker.treesitter.java.chunkers;
+
+public class PythonTSChunker {
+}

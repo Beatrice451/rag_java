@@ -1,4 +1,4 @@
-package com.beatrice.rag.utils;
+package com.beatrice.rag.git;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -32,6 +32,7 @@ public class GitRepository {
     private final Path repoLocalDir;
     private final Path repoLocalPath;
     private final String fullName;
+    private final boolean isLocal;
 
 
     public GitRepository(String repoUrl, Path repoLocalDir) {
@@ -44,6 +45,17 @@ public class GitRepository {
         this.repoLocalDir = repoLocalDir;
         this.repoLocalPath = this.repoLocalDir.resolve(repoName);
         this.fullName = extractFullName();
+        this.isLocal = false;
+    }
+
+    public GitRepository(Path repoLocalPath) {
+        this.repoUrl = "";
+        this.apiUrl = "";
+        this.repoName = repoLocalPath.getFileName().toString();
+        this.repoLocalDir = repoLocalPath.getParent();
+        this.repoLocalPath = repoLocalPath;
+        this.fullName = extractFullName();
+        this.isLocal = true;
     }
 
     public GitRepository(String repoUrl) {
@@ -84,6 +96,10 @@ public class GitRepository {
     }
 
     public void cloneRepo() {
+        if (this.isLocal) {
+            logger.warning("Repository %s is already local. Skipping clone".formatted(this.fullName));
+            return;
+        }
         logger.info("Trying to clone repository: %s".formatted(this.repoName));
         if (this.isCloned()) {
             logger.info("Repository %s already cloned. Using existing copy".formatted(this.repoName));
@@ -100,6 +116,11 @@ public class GitRepository {
     }
 
     public void cloneRepo(String branchToClone) {
+        if (this.isLocal) {
+            logger.warning("Repository %s is already local. Skipping clone".formatted(this.fullName));
+            return;
+        }
+
         String branchRef = "refs/heads/" + branchToClone;
         logger.info("Trying to clone repository: %s, branch: %s".formatted(this.repoName, branchToClone));
         if (this.isCloned(branchToClone)) {
@@ -118,6 +139,10 @@ public class GitRepository {
     }
 
     public Map<String, Object> getInfo(String... fields) {
+        if (this.isLocal) {
+            logger.warning("Repository %s is local. Can't send request to GitHub API".formatted(this.fullName));
+            return new HashMap<>();
+        }
         String body;
         Map<String, Object> mapResponse;
         ObjectMapper mapper = new ObjectMapper();
@@ -171,6 +196,10 @@ public class GitRepository {
      */
 
     public boolean isRepoExists() {
+        if (this.isLocal) {
+            logger.warning("Repository %s is local. Can't send request to GitHub API".formatted(this.fullName));
+            return false;
+        }
         int code;
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -219,10 +248,10 @@ public class GitRepository {
                 '}';
     }
 
-    private String extractApiUrl() {
-        return this.repoUrl.replace("https://github.com/", "https://api.github.com/repos/");
+        private String extractApiUrl() {
+            return this.repoUrl.replace("https://github.com/", "https://api.github.com/repos/");
 
-    }
+        }
 
     private String extractRepoName() {
         String[] splitUrl = this.repoUrl.split("/");
