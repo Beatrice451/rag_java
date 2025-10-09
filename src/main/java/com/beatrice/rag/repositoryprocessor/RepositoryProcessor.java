@@ -1,7 +1,6 @@
 package com.beatrice.rag.repositoryprocessor;
 
 import com.beatrice.rag.database.ChunkDao;
-import com.beatrice.rag.database.Database;
 import com.beatrice.rag.exception.ParserException;
 import com.beatrice.rag.repositoryprocessor.chunkembedder.Embedder;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileData;
@@ -9,7 +8,7 @@ import com.beatrice.rag.repositoryprocessor.fileparser.FileParser;
 import com.beatrice.rag.repositoryprocessor.filewalker.FileWalker;
 import com.beatrice.rag.repositoryprocessor.textchunker.Chunk;
 import com.beatrice.rag.repositoryprocessor.textchunker.TextChunker;
-import com.beatrice.rag.utils.GitRepository;
+import com.beatrice.rag.git.GitRepository;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
