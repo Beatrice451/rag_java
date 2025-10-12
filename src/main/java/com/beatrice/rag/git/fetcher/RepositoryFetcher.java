@@ -1,4 +1,4 @@
-package com.beatrice.rag.git;
+package com.beatrice.rag.git.fetcher;
 
 import com.beatrice.rag.git.dto.RepositoryContext;
 

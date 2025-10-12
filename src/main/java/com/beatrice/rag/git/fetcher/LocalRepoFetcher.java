@@ -1,4 +1,4 @@
-package com.beatrice.rag.git;
+package com.beatrice.rag.git.fetcher;
 
 import com.beatrice.rag.git.dto.RepositoryContext;
 import org.eclipse.jgit.lib.Repository;
@@ -28,24 +28,22 @@ public class LocalRepoFetcher implements RepositoryFetcher {
             throw new IllegalArgumentException("Not a git repository: " + source);
         }
 
-        try (
-                Repository repository = new FileRepositoryBuilder()
-                        .setGitDir(gitDir)
-                        .readEnvironment()
-                        .findGitDir()
-                        .build()
-        ) {
-            return repository;
+        try {
+            return new FileRepositoryBuilder()
+                    .setGitDir(gitDir)
+                    .readEnvironment()
+                    .findGitDir()
+                    .build();
         } catch (IOException e) {
             throw new IllegalArgumentException("Can't read .git directory");
         }
     }
 
     private RepositoryContext extractContext(Repository repo) {
-        String fullName = "<no_data>";
-        String owner = "<no_data>";
+        String fullName = null;
+        String owner = null;
         Path localRepoPath = repo.getWorkTree().toPath();
-        String remoteUrl = "<no_data>";
+        String remoteUrl = null;
         boolean isLocal = true;
 
 
@@ -62,7 +60,7 @@ public class LocalRepoFetcher implements RepositoryFetcher {
             }
         }
 
-        if (fullName.isBlank() || fullName.equals("<no_data>")) {
+        if (fullName == null || fullName.isBlank()) {
             logger.warning("Can't extract GitHub URL from remotes");
         }
         return new RepositoryContext(
