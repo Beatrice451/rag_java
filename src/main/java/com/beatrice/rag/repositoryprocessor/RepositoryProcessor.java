@@ -2,13 +2,14 @@ package com.beatrice.rag.repositoryprocessor;
 
 import com.beatrice.rag.database.ChunkDao;
 import com.beatrice.rag.exception.ParserException;
+import com.beatrice.rag.git.RepositoryService;
+import com.beatrice.rag.git.dto.RepositoryContext;
 import com.beatrice.rag.repositoryprocessor.chunkembedder.Embedder;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileData;
 import com.beatrice.rag.repositoryprocessor.fileparser.FileParser;
 import com.beatrice.rag.repositoryprocessor.filewalker.FileWalker;
 import com.beatrice.rag.repositoryprocessor.textchunker.Chunk;
 import com.beatrice.rag.repositoryprocessor.textchunker.TextChunker;
-import com.beatrice.rag.git.GitRepository;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
  */
 public class RepositoryProcessor {
     private static final Logger logger = Logger.getLogger(RepositoryProcessor.class.getName());
-
+    private static final RepositoryService repositoryService = new RepositoryService(Path.of("~/.cache/repos"));
     private final FileWalker walker;
     private final FileParser parser;
     private final TextChunker chunker;
@@ -53,39 +54,18 @@ public class RepositoryProcessor {
         this.dao = dao;
     }
 
-    /**
-     * Processes the given Git repository and returns a list of text chunks with embeddings.
-     * <p>
-     * This method performs the following steps:
-     * <ul>
-     *   <li>Clones the repository (if not already cloned)</li>
-     *   <li>Walks through the files in the repository and filters them using {@code FileWalker}</li>
-     *   <li>Parses each file with {@code FileParser}</li>
-     *   <li>Splits the parsed content into chunks using {@code TextChunker}</li>
-     *   <li>Generates embeddings for the chunks via {@code ChunkEmbedder}</li>
-     *   <li>Associates the embeddings with the corresponding chunks</li>
-     *   <li>Persists each chunk in the database via {@code ChunkDao}</li>
-     * </ul>
-     *
-     * @param repository the Git repository to process
-     * @return a list of {@link Chunk} objects with associated embeddings and metadata
-     * @throws RuntimeException if file parsing fails
-     */
-    public List<Chunk> processRepository(GitRepository repository) {
-        return this.processRepository(repository, "main");
-    }
 
-    public List<Chunk> processRepository(GitRepository repository, String repoBranch) {
-        repository.cloneRepo(repoBranch);
+    public List<Chunk> processRepository(String source) {
+        RepositoryContext context = repositoryService.loadRepository(source);
+        Path repoRoot = context.localRepoPath();
         List<Chunk> chunks = new ArrayList<>();
 
-        Path repoRoot = repository.getRepoLocalPath();
         Stream<Path> filteredFiles = walker.walk(repoRoot);
         filteredFiles.map(this::safeParse)
                 .flatMap(Optional::stream)
                 .flatMap(parsed -> chunker.chunk(parsed).stream())
                 .forEach(chunks::add);
-        chunks.forEach(chunk -> chunk.setSourceRepo(repository.getFullName()));
+        chunks.forEach(chunk -> chunk.setSourceRepo(context.fullName()));
 
         Set<String> existingHashes = getExistingChunkHashes(chunks, 500);
         List<Chunk> chunksToEmbed = chunks.stream()

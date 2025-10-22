@@ -12,9 +12,24 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+/**
+ * Fetches metadata from a local Git repository located on the filesystem.
+ * <p>
+ * This implementation opens an existing local repository and extracts context data
+ * such as the owner, full name, and remote URL (if available).
+ * </p>
+ */
 public class LocalRepoFetcher implements RepositoryFetcher {
     private static final Logger logger = Logger.getLogger(LocalRepoFetcher.class.getName());
 
+    /**
+     * Fetches metadata for the local repository located at the given path.
+     *
+     * @param source absolute or relative path to a local Git repository
+     * @return {@link RepositoryContext} describing the repository
+     * @throws IllegalArgumentException if the provided path is not a Git repository
+     */
     @Override
     public RepositoryContext fetch(String source) {
         try (Repository repo = open(Path.of(source))) {
@@ -22,6 +37,14 @@ public class LocalRepoFetcher implements RepositoryFetcher {
         }
     }
 
+
+    /**
+     * Opens a Git repository from the specified filesystem path.
+     *
+     * @param source path to the repository root directory
+     * @return an instance of {@link Repository}
+     * @throws IllegalArgumentException if the repository cannot be opened
+     */
     private Repository open(Path source) throws IllegalArgumentException {
         File gitDir = source.resolve(".git").toFile();
         if (!gitDir.exists()) {
@@ -39,6 +62,13 @@ public class LocalRepoFetcher implements RepositoryFetcher {
         }
     }
 
+    /**
+     * Extracts metadata from the given {@link Repository} instance.
+     * Attempts to infer GitHub-specific data such as full name and owner.
+     *
+     * @param repo opened JGit repository instance
+     * @return {@link RepositoryContext} with extracted metadata
+     */
     private RepositoryContext extractContext(Repository repo) {
         String fullName = null;
         String owner = null;

@@ -1,10 +1,7 @@
 package com.beatrice.rag.git;
 
-import org.eclipse.jgit.lib.Repository;
-import org.junit.jupiter.api.BeforeAll;
+import com.beatrice.rag.git.fetcher.LocalRepoFetcher;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
 
 public class LocalRepoFetcherTest {
 
