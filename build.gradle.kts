@@ -30,13 +30,19 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.tika/tika-core
     implementation("org.apache.tika:tika-core:3.2.1")
 
+    // https://mvnrepository.com/artifact/org.apache.tika/tika-parsers-standard-package
+    implementation("org.apache.tika:tika-parsers-standard-package:3.2.1") {
+        exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+    }
+
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     implementation("com.zaxxer:HikariCP:7.0.0")
 }
 
 tasks.test {
-    jvmArgs = (jvmArgs ?: mutableListOf()).apply {
+    jvmArgs = jvmArgs.apply {
         add("-javaagent:${mockitoAgent.asPath}")
     }
     useJUnitPlatform()
+    systemProperty("java.util.logging.config.file", "${projectDir}/src/test/resources/logging.properties")
 }
