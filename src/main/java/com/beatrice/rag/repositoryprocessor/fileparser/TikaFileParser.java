@@ -15,14 +15,25 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 
 import static com.beatrice.rag.Config.ALLOWED_MIME_TYPES;
 
 public class TikaFileParser extends AbstractFileParser {
+    private final Set<String> allowedMimeTypes;
+
+    public TikaFileParser() {
+        allowedMimeTypes = ALLOWED_MIME_TYPES;
+    }
+
+    public TikaFileParser(Set<String> allowedMimeTypes) {
+        this.allowedMimeTypes = allowedMimeTypes;
+    }
+
     @Override
     public FileData parse(Path file) throws IOException, ParserException {
         String fileMime = detectMime(file);
-        if (!ALLOWED_MIME_TYPES.contains(fileMime)) {
+        if (!allowedMimeTypes.contains(fileMime)) {
             throw new ParserException("Unallowed MIME type: %s for file %s".formatted(fileMime, file));
         }
         String content = readFile(file);
